@@ -4,14 +4,18 @@ from tkinter import ttk
 import pandas as pd
 from tkinter import PhotoImage
 from tkinter import messagebox
+from PIL import ImageTk, Image
+
 
 class ScrollableFrame(ttk.Frame):
     def __init__(self, container, *args, **kwargs):
         super().__init__(container, *args, **kwargs)
+
         canvas = tk.Canvas(self, borderwidth=0, highlightthickness=0, width=310, height=750)
 
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
         self.scrollable_frame = ttk.Frame(canvas)
+
 
         self.scrollable_frame.bind(
             "<Configure>",
@@ -22,14 +26,18 @@ class ScrollableFrame(ttk.Frame):
 
         canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
 
+
         canvas.configure(yscrollcommand=scrollbar.set)
 
         canvas.pack(side="left", fill="both", expand=False)
         scrollbar.pack(side="right", fill="y")
 
 def calcTime():
+
+    avail_buses = tk.Label(main_win, text="Available Buses", font=("Helvetical Bold", 25))
+    avail_buses.place(x=750, y=190)
     global df
-    df = pd.read_csv("Bus_dataset.csv")
+    df = pd.read_csv("Bus DATA SET.csv")
 
     bus_stand_name = starting_stop.get()
     user_time_zone = str(hrs.get().zfill(2)) + str(min.get().zfill(2))
@@ -61,55 +69,74 @@ def calcTime():
         style.configure('TRadiobutton', font=("Segoe UI", 14), foreground='black')
         temp.pack()
 
-    frame3.place(x=1100, y=40)
+    frame3.place(x=700, y=230)
 
     calc_button = ttk.Button(main_win, text="Calculate Estimated Time", style="TButton", command=calc)
     calc_button.place(x=750, y=500)
 
 
 def calc():
-    try:
-        Select_time = bus_select.get()
-        Ending_stop = dest_stop.get()
 
-        end_time = []
-        for i in df.index:
-            a = df.loc[i, "Bus Stand Names"]
-            if a == Ending_stop:
-                end_time.append(df.iloc[i])
+    # try:
+    #
+    #
+    #     # print(f"Estimated time is {abs(est_time[0])} hour(s) and {abs(est_time[1])} minutes")
+    #
+    # except:
+    #     messagebox.showerror("Invalid Input", "Invalid Input")
 
-        temp = []
-        for i in end_time:
-            for j in range(1, len(i)):
-                temp.append(i[j])
-        end_time = temp
+    est_time_label = tk.Label(main_win, text="Estimated",
+                              font=("Segoe UI", 40))
+    est_time_label2 = tk.Label(main_win, text="Time", font=("Segoe UI",40))
+    est_time_label2.place(x=1080, y = 110)
+    est_time_label.place(x=1080, y=60)
 
-        # In[108]:
+    Select_time = bus_select.get()
+    Ending_stop = dest_stop.get()
 
-        col_val = start_time.index(Select_time)
-        start = start_time[col_val].split(":")
-        end = end_time[col_val].split(":")
-        est_time = []
-        for i in range(2):
-            est_time.append(int(end[i]) - int(start[i]))
-        est_time_label.configure(text=f"Estimated time: {abs(est_time[0])} hour(s) and {abs(est_time[1])} minute(s)")
-        print(f"Estimated time is {abs(est_time[0])} hour(s) and {abs(est_time[1])} minutes")
-    except:
-        messagebox.showerror("Invalid Input", "Invalid Input")
+    end_time = []
+    for i in df.index:
+        a = df.loc[i, "Bus Stand Names"]
+        if a == Ending_stop:
+            end_time.append(df.iloc[i])
 
+    temp = []
+    for i in end_time:
+        for j in range(1, len(i)):
+            temp.append(i[j])
+    end_time = temp
 
+    # In[108]:
 
+    col_val = start_time.index(Select_time)
+    start = start_time[col_val].split(":")
+    end = end_time[col_val].split(":")
+    est_time = []
+    for i in range(2):
+        est_time.append(int(end[i]) - int(start[i]))
+    # est_time_label.configure(text=f"Estimated time: {abs(est_time[0])} hour(s) and {abs(est_time[1])} minute(s)")
+
+    h = str(abs(est_time[0]))
+    m = str(abs(est_time[1]))
+
+    a_time_label = tk.Label(main_win, text=str(h.zfill(2)),
+                            font=("Segoe UI", 120), fg="#5183cf")
+    b_time_label = tk.Label(main_win, text="HH",
+                            font=("Segoe UI", 30), fg="grey")
+    c_time_label = tk.Label(main_win, text=str(m.zfill(2)),
+                            font=("Segoe UI", 100), fg="#5183cf")
+    d_time_label = tk.Label(main_win, text="MM",
+                            font=("Segoe UI", 30), fg="grey")
+    a_time_label.place(x=1080, y=230)
+    b_time_label.place(x=1223, y=300)
+    c_time_label.place(x=1100, y=400)
+    d_time_label.place(x=1223, y=470)
 
 main_win = tk.Tk()
 main_win.geometry("1300x800")
 main_win.title("Bus")
 
-bg = PhotoImage(file = "bus image.png")
-canvas1 = tk.Canvas( main_win, width = 400,height = 400)
-canvas1.create_image( 0, 0, image = bg, anchor = "nw")
-
-
-bus_stop = open("Bus_dataset.csv", "r")
+bus_stop = open("Bus DATA SET.csv", "r")
 reader = csv.reader(bus_stop)
 temp = list(reader)
 stand_names = []
@@ -179,14 +206,7 @@ starting_label = tk.Label(main_win, text="Starting stop",font=("Helvetical Bold"
 dest_label = tk.Label(main_win, text="Destination stop",font=("Helvetical Bold", 25))
 
 time = tk.Label(main_win, text="Select Boarding Time",font=("Helvetical Bold", 25))
-time.place(x=700,y=0)
-
-avail_buses = tk.Label(main_win, text="Available Buses",font=("Helvetical Bold", 25))
-avail_buses.place(x=1050,y=0)
-
-est_time_label = tk.Label(main_win, text=f"Estimated time: ",
-                          font=("Segoe UI", 15))
-est_time_label.place(x=700, y=200)
+time.place(x=725,y=0)
 
 hrs = tk.Spinbox(main_win, from_=0, to=23,  width=4, wrap=True, font=("Segoe UI", 15))
 hrs_label = tk.Label(main_win, text="HH               MM", font=("Segoe UI", 15))
@@ -207,7 +227,7 @@ style.configure("TButton", font=("Segoe UI", 12))
 
 starting_label.grid(row=0, column=0)
 frame.grid(row=1, column=0)
-canvas1.grid(row=0, column=0, padx=0, pady=0, rowspan=10, columnspan=10, sticky='ew')
+
 frame2.grid(row=1, column=1)
 dest_label.grid(row=0, column=1)
 #separator.grid(rowspan=5, column=1, sticky='ew')
