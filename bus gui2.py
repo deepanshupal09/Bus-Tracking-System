@@ -2,6 +2,7 @@ import tkinter as tk
 import csv
 from tkinter import ttk
 import pandas as pd
+from datetime import datetime, timedelta
 from tkinter import PhotoImage
 from tkinter import messagebox
 from PIL import ImageTk, Image
@@ -16,7 +17,6 @@ class ScrollableFrame(ttk.Frame):
         scrollbar = ttk.Scrollbar(self, orient="vertical", command=canvas.yview)
         self.scrollable_frame = ttk.Frame(canvas)
 
-
         self.scrollable_frame.bind(
             "<Configure>",
             lambda e: canvas.configure(
@@ -26,21 +26,27 @@ class ScrollableFrame(ttk.Frame):
 
         canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
 
-
         canvas.configure(yscrollcommand=scrollbar.set)
 
         canvas.pack(side="left", fill="both", expand=False)
         scrollbar.pack(side="right", fill="y")
 
-def calcTime():
 
+def calcTime():
     avail_buses = tk.Label(main_win, text="Available Buses", font=("Helvetical Bold", 25))
-    avail_buses.place(x=750, y=190)
+    # avail_buses.place(x=750, y=190)
     global df
     df = pd.read_csv("Bus DATA SET.csv")
 
     bus_stand_name = starting_stop.get()
-    user_time_zone = str(hrs.get().zfill(2)) + str(min.get().zfill(2))
+    user_time_zone = str(hrs.get().zfill(2)) + ":" + str(min.get().zfill(2))
+    format = '%H:%M'
+
+    d = datetime.strptime(user_time_zone, format) - timedelta(hours=0, minutes=10)
+    st = d.strftime("%H:%M")
+
+    user_time_zone = st.replace(":","")
+    print(user_time_zone)
 
     global start_time
     start_time = []
@@ -65,18 +71,18 @@ def calcTime():
 
     frame3 = ScrollableFrame(main_win)
     for i in avail_buses:
-        temp = ttk.Radiobutton(frame3.scrollable_frame, text=i, value=i, variable=bus_select, padding=5,style="TRadiobutton")
+        temp = ttk.Radiobutton(frame3.scrollable_frame, text=i, value=i, variable=bus_select, padding=5,
+                               style="TRadiobutton")
         style.configure('TRadiobutton', font=("Segoe UI", 14), foreground='black')
         temp.pack()
 
-    frame3.place(x=700, y=230)
+    frame3.place(x=700, y=450)
 
     calc_button = ttk.Button(main_win, text="Calculate Estimated Time", style="TButton", command=calc)
     calc_button.place(x=750, y=500)
 
 
 def calc():
-
     # try:
     #
     #
@@ -85,9 +91,7 @@ def calc():
     # except:
     #     messagebox.showerror("Invalid Input", "Invalid Input")
 
-
-
-    Select_time = bus_select.get()
+    Select_time = str(int(bus_select.get().replace(":",""))-10)
     Ending_stop = dest_stop.get()
 
     end_time = []
@@ -118,6 +122,7 @@ def calc():
     a_time_label.configure(text=h.zfill(2))
     c_time_label.configure(text=m.zfill(2))
 
+
 main_win = tk.Tk()
 main_win.geometry("1300x800")
 main_win.title("Bus")
@@ -127,12 +132,11 @@ reader = csv.reader(bus_stop)
 temp = list(reader)
 stand_names = []
 
-for i in range(1,len(temp)):
+for i in range(1, len(temp)):
     stand_names.append(temp[i][0])
 
-
 btns = []
-X,Y = 10,20
+X, Y = 10, 20
 
 # for i in stand_names:
 #     tempBtn = ttk.Button(main_win, text=i, command=main_win.destroy, width=30)
@@ -149,14 +153,15 @@ starting_stop = tk.StringVar()
 dest_stop = tk.StringVar()
 
 frame = ScrollableFrame(main_win, borderwidth=0)
-#frame.place(x=10,y=10)
+# frame.place(x=10,y=10)
 
 style = ttk.Style()
 
 for i in stand_names:
-    bus = ttk.Radiobutton(frame.scrollable_frame, text=i, value=i, variable=starting_stop, padding=5, style="TRadiobutton")
+    bus = ttk.Radiobutton(frame.scrollable_frame, text=i, value=i, variable=starting_stop, padding=5,
+                          style="TRadiobutton")
     style.configure('TRadiobutton', font=("Segoe UI", 14), foreground='black')
-    #bus.place(x=X, y=Y)
+    # bus.place(x=X, y=Y)
     # if X >= 1100:
     #     X = 10
     #     Y += 60
@@ -164,19 +169,19 @@ for i in stand_names:
     #     X += 160
     bus.pack()
 
-
 frame2 = ScrollableFrame(main_win, borderwidth=0)
-#frame2.place(x=400,y=10)
+# frame2.place(x=400,y=10)
 
 # separator = ttk.Separator(main_win, orient="vertical").grid(row=0,column=2,rowspan=4, ipady=500, sticky='ns')
 # separator2 = ttk.Separator(main_win, orient="vertical").grid(row=0,column=10,rowspan=4, ipady=500, sticky='ns')
 
-#separator.pack(fill='y')
+# separator.pack(fill='y')
 
 for i in stand_names:
-    bus2 = ttk.Radiobutton(frame2.scrollable_frame, text=i, value=i, variable=dest_stop, padding=5, style="TRadiobutton")
+    bus2 = ttk.Radiobutton(frame2.scrollable_frame, text=i, value=i, variable=dest_stop, padding=5,
+                           style="TRadiobutton")
     style.configure('TRadiobutton', font=("Segoe UI", 14), foreground='black')
-    #bus.place(x=X, y=Y)
+    # bus.place(x=X, y=Y)
     # if X >= 1100:
     #     X = 10
     #     Y += 60
@@ -184,24 +189,23 @@ for i in stand_names:
     #     X += 160
     bus2.pack()
 
-
 # ENTERING TIME
-#style.configure("TSpinbox", arrowsize=200)
+# style.configure("TSpinbox", arrowsize=200)
 
-starting_label = tk.Label(main_win, text="Starting stop",font=("Helvetical Bold", 25))
-dest_label = tk.Label(main_win, text="Destination stop",font=("Helvetical Bold", 25))
+starting_label = tk.Label(main_win, text="Starting stop", font=("Helvetical Bold", 25))
+dest_label = tk.Label(main_win, text="Destination stop", font=("Helvetical Bold", 25))
 
-time = tk.Label(main_win, text="Select Boarding Time",font=("Helvetical Bold", 25))
-time.place(x=725,y=0)
+time = tk.Label(main_win, text="Select Boarding Time", font=("Helvetical Bold", 25))
+time.place(x=725, y=50)
 
-hrs = tk.Spinbox(main_win, from_=0, to=23,  width=4, wrap=True, font=("Segoe UI", 15))
+hrs = tk.Spinbox(main_win, from_=0, to=23, width=4, wrap=True, font=("Segoe UI", 15))
 hrs_label = tk.Label(main_win, text="HH               MM", font=("Segoe UI", 15))
-hrs_label.place(x=760,y=40)
-hrs.place(x=760, y=80)
+hrs_label.place(x=760, y=100)
+hrs.place(x=760, y=140)
 colon = tk.Label(main_win, text=":", font=("Helvetical Bold", 25))
-colon.place(x=830,y=70)
+colon.place(x=830, y=130)
 min = tk.Spinbox(main_win, from_=0, to=59, width=4, wrap=True, font=("Segoe UI", 15))
-min.place(x=850, y=80)
+min.place(x=850, y=140)
 
 h = "00"
 m = "00"
@@ -212,7 +216,7 @@ est_time_label2 = tk.Label(main_win, text="Time", font=("Segoe UI", 40))
 est_time_label2.place(x=1080, y=110)
 est_time_label.place(x=1080, y=60)
 
-global a_time_label,b_time_label,c_time_label,d_time_label
+global a_time_label, b_time_label, c_time_label, d_time_label
 
 a_time_label = tk.Label(main_win, text=str(h.zfill(2)),
                         font=("Segoe UI", 120), fg="#5183cf")
@@ -227,22 +231,34 @@ b_time_label.place(x=1223, y=300)
 c_time_label.place(x=1100, y=400)
 d_time_label.place(x=1223, y=470)
 
+# select_travel_mode = tk.Label(main_win, text="Select the mode with which you", font=("Helvetical Bold", 26))
+# select_travel_mode2 = tk.Label(main_win, text="want to travel:", font=("Helvetical Bold", 26))
+# select_travel_mode.place(x=680, y=200)
+# select_travel_mode2.place(x=680, y=230)
 
+# travel_mode = tk.StringVar()
+
+# least_time = ttk.Radiobutton(main_win, text="Least Time", value="Least Time", variable=travel_mode, padding=5,
+#                              style="My.TRadiobutton")
+# least_fare = ttk.Radiobutton(main_win, text="Least Fare", value="Least Fare", variable=travel_mode, padding=5,
+#                              style="My.TRadiobutton")
+
+# style.configure("My.TRadiobutton", font=("Segoe UI", 20), foreground="#4d524f")
+
+# least_time.place(x=680, y=270)
+# least_fare.place(x=680, y=300)
 
 submit = ttk.Button(main_win, text="Submit", command=calcTime, style="TButton")
-submit.place(x=785,y=140)
+submit.place(x=800, y=350)
 
-style.configure("TButton", font=("Segoe UI", 12))
+style.configure("TButton", font=("Segoe UI", 20))
 
 starting_label.grid(row=0, column=0)
 frame.grid(row=1, column=0)
 
 frame2.grid(row=1, column=1)
 dest_label.grid(row=0, column=1)
-#separator.grid(rowspan=5, column=1, sticky='ew')
-
-
-
+# separator.grid(rowspan=5, column=1, sticky='ew')
 
 
 main_win.mainloop()
